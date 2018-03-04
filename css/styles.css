@@ -1,0 +1,9 @@
+.card-name {
+  color: red;
+  font-weight: bold;
+  padding: 10px;
+}
+.card {
+  padding: 20px;
+  margin: 10px;
+}
