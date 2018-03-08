@@ -23,10 +23,26 @@
         <input type="number" min="1" max="52" name="draw-count" id="draw-count" value="2"><br>
         <input type="submit" id="submit" value="Draw">
       </form>
-      <h1>Cards</h1>
-      <ul id="cards"></ul>
-      <h2>Deck ID:</h2>
+      <h3>Cards</h3>
+      <ul id="cards-list">
+        <!-- <li>
+          <div class="card">
+            <div class="card-image">
+              <img src="https://deckofcardsapi.com/static/img/AS.png">
+              <span class="card-title">AS</span>
+            </div>
+            <div class="card-content">
+              <p>This card is the Ace of Spades.</p>
+            </div>
+            <div class="card-action">
+              <a href="#">Select this card</a>
+            </div>
+          </div>
+        </li> -->
+      </ul>
+      <h5>Deck ID:</h5>
       <div id="did"></div>
+      <button type="button" id="new-deck">New Deck</button>
     </div>
 
     <!--Import jQuery before materialize.js-->
