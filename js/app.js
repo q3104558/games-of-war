@@ -21,6 +21,12 @@
   //     console.log(error);
   //   });
 
+  let winning = 0;
+
+  const refreshPoints = () => {
+    let points = document.getElementById('points');
+    points.innerHTML = `&nbsp;${winning}`;
+  }
 
   const compareCards = (card1, card2) => {
     let val1 = card1.code.substr(0, 1);
@@ -65,20 +71,15 @@
       default:
         result2 = parseInt(val2, 10);
     }
+    console.log(result1);
+    console.log(result2);
     if (result1 > result2) {
-      return card1;
+      return 1; // victory for card1
     } else if (result2 > result1) {
-      return card2;
+      return -1; // victory for card2
     }
-    console.log('WAR!');
-    return card1;
-  }
-
-  const saveCard = (card) => {
-    if (card > 1) {
-      return true
-    }
-    return false
+    // console.log('WAR!');
+    return 0; // tie
   }
 
   function drawUrl(id, count) {
@@ -87,17 +88,45 @@
     return tempUrl;
   }
 
+  function checkUrl(id) {
+    let tempUrl = 'https://deckofcardsapi.com/api/deck/replacewithid/';
+    tempUrl = tempUrl.replace('replacewithid', id);
+    return tempUrl;
+  }
+
   const newDeckUrl = 'https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1';
   let deckid = localStorage.getItem('deckid') || 'rc7othcekbl6';
   let remain = 52;
 
-  const newDeckId = (event) => {
+  const updateRemaining = () => {
+    fetch(checkUrl(deckid))
+      .then(resp => resp.json())
+      .then(function (data) {
+        remain = data.remaining;
+        console.log('remaining: ', remain);
+        let remainPutter = document.getElementById('num-remaining');
+        remainPutter.innerHTML = `&nbsp;${remain}`;
+        return true;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
+  const clickForRemaining = (event) => {
     event.preventDefault();
+    refreshPoints();
+    updateRemaining();
+  }
+
+  const generateDeckId = () => {
     fetch(newDeckUrl)
       .then(resp => resp.json())
       .then(function (data) {
         remain = data.remaining;
         deckid = data.deck_id;
+        winning = 0;
+        refreshPoints();
         console.log('deck id: ', deckid);
         localStorage.setItem('deckid', deckid);
         document.getElementById('did').innerHTML = deckid;
@@ -106,11 +135,17 @@
           cardList.removeChild(cardList.firstChild);
         }
         // console.log('remaining: ', remain);
+        updateRemaining();
         return deckid;
       })
       .catch(function (error) {
         console.log(error);
       });
+  }
+
+  const newDeckId = (event) => {
+    event.preventDefault();
+    generateDeckId();
   }
 
   const makeCard = (card) => {
@@ -135,7 +170,7 @@
     let div2 = document.createElement('div');
     div2.className = 'card-content';
     let desc = document.createElement('p');
-    desc.className = 'red-text';
+    desc.className = 'red-text text-darken-3';
     desc.innerHTML = `This card is the ${actualCard}.`;
     let div3 = document.createElement('div');
     div3.className = 'card-action'
@@ -173,13 +208,14 @@
 
   // let cardList = document.getElementById('cards');
   const drawCard = (event) => {
-    event.preventDefault()
+    event.preventDefault();
     if (remain > 0) {
       fetch(drawUrl(deckid, document.getElementById('draw-count').value))
         .then(resp => resp.json())
         .then(function (data) {
           let cards = data.cards;
           remain = data.remaining;
+          updateRemaining();
           return cards.map(function (card) {
             let cardList = document.getElementById('cards-list');
             // let li = document.createElement('li');
@@ -197,7 +233,7 @@
             let cardResult = makeCard(card);
             cardList.appendChild(cardResult);
             remain = data.remaining;
-            console.log('remaining: ', remain);
+            // console.log('remaining: ', remain);
             return card;
           })
         })
@@ -208,16 +244,85 @@
     // console.log('remaining: ', remain);
   }
 
+  const drawWar = (num) => {
+    fetch(drawUrl(deckid, num))
+      .then(resp => resp.json())
+      .then(function (data) {
+        let cards = data.cards;
+        cards.forEach(function (card) {
+          console.log('card code: ', card.code);
+        })
+        remain = data.remaining;
+        // console.log('remaining: ', remain);
+        updateRemaining();
+        let arr = [];
+        arr[0] = cards[cards.length - 2];
+        arr[1] = cards[cards.length - 1];
+        let battle = compareCards(arr[0], arr[1]);
+        winning += battle;
+        if (num === 4) {
+          winning += battle;
+        }
+        if (battle === 1) {
+          console.log('Player 1 wins the round!');
+        }
+        else if (battle === -1) {
+          console.log('Player 2 wins the round!');
+        }
+        else {
+          console.log('WAR!');
+          drawWar(4);
+        }
+        refreshPoints();
+        return arr.map(function (card) {
+          let cardList = document.getElementById('cards-list');
+          // console.log('card code: ', card.code);
+          let cardResult = makeCard(card);
+          cardList.appendChild(cardResult);
+          remain = data.remaining;
+          // console.log('remaining: ', remain);
+          return card;
+        })
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    // console.log('remaining: ', remain);
+  }
+
+  const doWar = (event) => {
+    event.preventDefault();
+    let cardList = document.getElementById('cards-list');
+    while (cardList.firstChild) {
+      cardList.removeChild(cardList.firstChild);
+    }
+    drawWar(2);
+  }
+
   window.onload = () => {
+    // document
+    //   .getElementById('draw-form')
+    //   .addEventListener('submit', drawCard);
     document
-      .getElementById('form')
-      .addEventListener('submit', drawCard);
+      .getElementById('war-button')
+      .addEventListener('click', doWar);
+    document
+      .getElementById('get-remaining')
+      .addEventListener('click', clickForRemaining);
     document
       .getElementById('new-deck')
       .addEventListener('click', newDeckId);
+    if (deckid === 'rc7othcekbl6') {
+      generateDeckId();
+    }
     document
       .getElementById('did')
-      .innerHTML = deckid;
+      .innerHTML = `&nbsp;${deckid}`;
+    updateRemaining();
+    refreshPoints();
+    document
+      .getElementById('num-remaining')
+      .innerHTML = `&nbsp;${remain}`;
   }
 })()
 

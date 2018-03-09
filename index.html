@@ -18,12 +18,20 @@
 
     <div>
       <!-- <img id="card1" src="http://placebear.com/226/314"> -->
-      <form id="form" name="form">
-        Num of cards to draw:<br>
+      <!-- <form id="draw-form" name="draw-form">
+         Num of cards to draw:<br>
         <input type="number" min="1" max="52" name="draw-count" id="draw-count" value="2"><br>
-        <input type="submit" id="submit" value="Draw">
-      </form>
-      <h3>Cards</h3>
+        <input type="submit" id="draw-submit" value="Draw">
+      </form> -->
+      <br>
+      <h4>&nbsp;POINTS: </h4><div id="points"></div>
+      <h5>&nbsp;Cards Remaining: </h5><div id="num-remaining"></div>
+      <button type="button" id="get-remaining">Update</button>
+      <br>
+      <h5>&nbsp;Draw a card: </h5>
+      <!-- <input type="submit" id="war-submit" value="Draw"> -->
+      <a id="war-button" class="waves-effect waves-light btn">Draw</a>
+      <h3>&nbsp;Cards</h3>
       <ul id="cards-list">
         <!-- <li>
           <div class="card">
@@ -40,8 +48,8 @@
           </div>
         </li> -->
       </ul>
-      <h5>Deck ID:</h5>
-      <div id="did"></div>
+      <br>
+      <h5>&nbsp;Deck ID: </h5><div id="did"></div>
       <button type="button" id="new-deck">New Deck</button>
     </div>
 
